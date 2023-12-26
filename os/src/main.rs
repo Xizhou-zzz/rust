@@ -6,9 +6,11 @@
 mod console;
 mod lang_items;
 mod sbi;
-mod batch;
-mod trap;
 mod syscall;
+mod trap;
+mod loader;
+mod config;
+mod task;
 
 use core::arch::global_asm;
 
@@ -20,14 +22,17 @@ fn clear_bss() {
         fn sbss();
         fn ebss();
     }
-    (sbss as usize..ebss as usize).for_each(|a| unsafe { (a as *mut u8).write_volatile(0) });
+    (sbss as usize..ebss as usize).for_each(|a| {
+        unsafe { (a as *mut u8).write_volatile(0) }
+    });
 }
 
 #[no_mangle]
 pub fn rust_main() -> ! {
     clear_bss();
-    println!("[Kernel] HELL, world!");
+    println!("[kernel] ABC");
     trap::init();
-    batch::init();
-    batch::run_next_app();
+    loader::load_apps();
+    task::run_first_task();
+    panic!("Unreachable in rust_main!");
 }
